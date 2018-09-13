@@ -113,3 +113,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
+
+# Line messaging settings
+LINE_CHANNEL_ACCESS_TOKEN = "Dixzcdn0Lkiy4Bh9Ir3kewfy1xu0prelOSP/D5FCT++V6vIbV64XMzumJR0JaJwaD3lC/9+DYa+iUJpoTD7vAbQYaM+bPK2dbtlFsMqDUrWP36bEijgMNXe0ETW+W+IZbXS6jahYnMt5wy+GgzGtqwdB04t89/1O/w1cDnyilFU="
+
+LINE_CHANNEL_SECRET = "a41cb7fbcd451e3372dfac78b9ab3721"
