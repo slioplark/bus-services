@@ -1,4 +1,6 @@
 # Create your views here.
+import urllib3
+
 from django.conf import settings
 from django.http import HttpResponse, HttpResponseBadRequest, HttpResponseForbidden
 from django.views.decorators.csrf import csrf_exempt
@@ -21,8 +23,12 @@ def callback(request):
         # get request body
         body = request.body.decode('utf-8')
 
+        # get request bus api
         try:
             events = parser.parse(body, signature)
+            http = urllib3.PoolManager()
+            r = http.request('GET',
+                             'http://data.ntpc.gov.tw/od/data/api/62519D6B-9B6D-43E1-BFD7-D66007005E6F?$format=json&$top=3')
         except InvalidSignatureError:
             return HttpResponseForbidden()
         except LineBotApiError:
@@ -32,7 +38,7 @@ def callback(request):
             if isinstance(event, MessageEvent):
                 line_bot_api.reply_message(
                     event.reply_token,
-                    TextSendMessage(text=event.message.text)
+                    TextSendMessage(text=r)
                 )
 
         return HttpResponse()
