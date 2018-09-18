@@ -56,7 +56,7 @@ def get_bus_info(text):
     try:
         t = text.split()
         station = t[0]
-        direction = '0' if t[1] == '北' else '1'
+        direction = '0' if t[1] == '去' else '1'
 
         r = requests.get('{}&$filter=nameZh eq {} and goBack eq {}'.format(api_bus_stop, station, direction))
         data = r.json()
@@ -66,7 +66,7 @@ def get_bus_info(text):
             name_list.append('Id eq ' + element['routeId'])
             time_list.append('StopID eq ' + element['Id'])
     except:
-        return '請輸入正確的站牌與方向\n如：永寧捷運站 北'
+        return '請輸入正確的站牌與方向\n如：捷運永寧站 去(回)'
 
     name_filter = ' or '.join(name_list)
     time_filter = ' or '.join(time_list)
@@ -92,7 +92,8 @@ def get_bus_info(text):
     # set line message
     message = ''
     for item in list:
-        message += '*{} ({})\n[往 {}]\n'.format(item['name'], item['time'], item['destination'])
+        station = item['destination'] if direction == '0' else item['departure']
+        message += '*{} ({})\n[往 {}]\n'.format(item['name'], item['time'], station)
 
     return message
 
