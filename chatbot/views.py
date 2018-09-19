@@ -99,13 +99,14 @@ def get_bus_info(text):
 
 
 def get_time_status(time):
-    if time == '-1':
+    time = int(time)
+    if time == -1:
         return '尚未發車'
-    elif time == '-2':
+    elif time == -2:
         return '交管不停靠'
-    elif time == '-3':
+    elif time == -3:
         return '末班車已過'
-    elif time == '-4':
+    elif time == -4:
         return '今日未營運'
     elif time > 60:
         return '{}分'.format(floor(time / 60))
