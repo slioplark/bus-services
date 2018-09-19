@@ -1,5 +1,6 @@
 # Create your views here.
 from math import floor
+from operator import itemgetter
 
 import requests
 from django.conf import settings
@@ -72,28 +73,26 @@ def get_bus_info(text):
     time_filter = ' or '.join(time_list)
 
     # get request from bus name
-    r = requests.get('{}&$filter={}'.format(api_bus_name, name_filter))
-    data = r.json()
-    for element in data:
-        for item in list:
+    data = requests.get('{}&$filter={}'.format(api_bus_name, name_filter)).json()
+    for item in list:
+        for element in data:
             if item['route_id'] == element['Id']:
                 item['name'] = element['nameZh']
                 item['departure'] = element['departureZh']
                 item['destination'] = element['destinationZh']
 
-    # get request from bus time
-    r = requests.get('{}&$filter={}'.format(api_bus_time, time_filter))
-    data = r.json()
-    for element in data:
-        for item in list:
+    # sort by bus name
+    list = sorted(list, key=itemgetter('name'))
+
+    # get request from bus time and set line message
+    message = ''
+    data = requests.get('{}&$filter={}'.format(api_bus_time, time_filter)).json()
+    for item in list:
+        for element in data:
             if item['id'] == element['StopID']:
                 item['time'] = get_time_status(element['EstimateTime'])
-
-    # set line message
-    message = ''
-    for item in list:
-        station = item['destination'] if direction == '0' else item['departure']
-        message += '*{} ({})\n[往 {}]\n'.format(item['name'], item['time'], station)
+                station = item['destination'] if direction == '0' else item['departure']
+                message += '*{} ({})\n[往 {}]\n'.format(item['name'], item['time'], station)
 
     return message
 
