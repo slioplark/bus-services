@@ -46,7 +46,7 @@ def callback(request):
 
 def get_bus_info(text):
     # set variable
-    list = []
+    info_list = []
     name_list = []
     time_list = []
     api_bus_stop = 'http://data.ntpc.gov.tw/od/data/api/62519D6B-9B6D-43E1-BFD7-D66007005E6F?$format=json';
@@ -63,7 +63,7 @@ def get_bus_info(text):
         data = r.json()
         for element in data:
             dict = {'id': element['Id'], 'route_id': element['routeId']}
-            list.append(dict)
+            info_list.append(dict)
             name_list.append('Id eq ' + element['routeId'])
             time_list.append('StopID eq ' + element['Id'])
     except:
@@ -74,25 +74,26 @@ def get_bus_info(text):
 
     # get request from bus name
     data = requests.get('{}&$filter={}'.format(api_bus_name, name_filter)).json()
-    for item in list:
-        for element in data:
-            if item['route_id'] == element['Id']:
-                item['name'] = element['nameZh']
-                item['departure'] = element['departureZh']
-                item['destination'] = element['destinationZh']
+    for item in info_list:
+        info = list(filter(lambda x: x['Id'] == item['route_id'], data))[0]
+        item['name'] = info['nameZh']
+        item['departure'] = info['departureZh']
+        item['destination'] = info['destinationZh']
 
     # sort by bus name
-    list = sorted(list, key=itemgetter('name'))
+    info_list = sorted(info_list, key=itemgetter('name'))
 
-    # get request from bus time and set line message
+    # get request from bus time
     message = ''
     data = requests.get('{}&$filter={}'.format(api_bus_time, time_filter)).json()
-    for item in list:
-        for element in data:
-            if item['id'] == element['StopID']:
-                item['time'] = get_time_status(element['EstimateTime'])
-                station = item['destination'] if direction == '0' else item['departure']
-                message += '*{} ({})\n[往 {}]\n'.format(item['name'], item['time'], station)
+    for item in info_list:
+        # set bus time
+        info = list(filter(lambda x: x['StopID'] == item['id'], data))[0]
+        item['time'] = get_time_status(info['EstimateTime'])
+
+        # set line message
+        station = item['destination'] if direction == '0' else item['departure']
+        message += '*{} ({})\n[往 {}]\n'.format(item['name'], item['time'], station)
 
     return message
 
